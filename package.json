@@ -1,0 +1,25 @@
+{
+  "name": "codex-api-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local API key gateway for Codex CLI",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "codex-api": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test test/*.test.js",
+    "audit:tools": "node scripts/audit-tools.mjs",
+    "audit:denial": "node scripts/audit-tools.mjs --probe",
+    "check": "node --check src/server.js && node --check src/codex.js && node --check public/app.js && node --check public/examples.js && node --check public/key-page.js && node --check public/i18n.js && node --check public/translations.js"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GabrielSandap/codex-api.git"
+  }
+}
