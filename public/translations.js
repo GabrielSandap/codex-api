@@ -216,5 +216,15 @@ export const translations = {
   "Si l’ordinateur dort ou si le service est arrêté, les appels échouent ou expirent. Réveillez-le et relancez le service avant de réessayer.": "If the computer sleeps or the service stops, requests fail or time out. Wake it and restart the service before retrying.",
   "Codex CLI stable 0.153.4 ou supérieur est requis. Mettez à jour uniquement si votre version est plus ancienne.": "Codex CLI 0.153.4 or newer (stable) is required. Update only if your installed version is older.",
   "Le contrôle de compatibilité de Codex a échoué. Les appels sont bloqués. Lancez npm run audit:denial pour diagnostiquer, puis redémarrez la passerelle après correction.": "Codex compatibility check failed. Requests are blocked. Run npm run audit:denial for diagnostics, then restart the gateway after resolving the issue.",
-  "Node.js 22+, Codex CLI stable compatible 0.153.4+ connecté avec ChatGPT et accès à gpt-6-astra sont requis. Lancez npm run setup pour vérifier les prérequis existants sans les réinstaller. Une connexion enregistrée ne garantit pas du quota disponible.": "Requires Node.js 22+, a compatible stable Codex CLI 0.153.4+ signed in with ChatGPT and access to gpt-6-astra. Run npm run setup to check existing prerequisites without reinstalling them. A saved login does not guarantee available allowance."
+  "Node.js 22+, Codex CLI stable compatible 0.153.4+ connecté avec ChatGPT et accès à gpt-6-astra sont requis. Lancez npm run setup pour vérifier les prérequis existants sans les réinstaller. Une connexion enregistrée ne garantit pas du quota disponible.": "Requires Node.js 22+, a compatible stable Codex CLI 0.153.4+ signed in with ChatGPT and access to gpt-6-astra. Run npm run setup to check existing prerequisites without reinstalling them. A saved login does not guarantee available allowance.",
+  "Quota Codex épuisé": "Codex usage limit reached",
+  "Codex limite temporairement les demandes": "Codex temporarily rate limited",
+  "Dernière limite observée, commune à toutes les clés de ce compte. Vos clés restent valides.": "Last observed request limit, shared by all keys on this account. Your keys remain valid.",
+  "Réinitialisation indiquée par Codex : {date}.": "Reset reported by Codex: {date}.",
+  "La date de réinitialisation indiquée est passée. Vous pouvez réessayer manuellement.": "The reported reset time has passed. You can retry manually.",
+  "Codex n’a pas fourni de date de réinitialisation. Vérifiez l’usage de votre compte avant de réessayer.": "Codex did not provide a reset time. Check your account usage before retrying.",
+  "Quota épuisé": "Quota exhausted",
+  "Limite de débit Codex": "Codex rate limit",
+  "Quota Codex épuisé. Votre clé API reste valide. Attendez la réinitialisation de votre quota avant de réessayer.": "Codex usage limit reached. Your API key remains valid. Wait for your account allowance to reset before retrying.",
+  "Codex limite temporairement les demandes. Attendez avant de réessayer.": "Codex is temporarily rate limited. Wait before retrying."
 };

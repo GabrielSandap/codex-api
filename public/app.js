@@ -1,3 +1,4 @@
+import { renderUsage } from './usage.js';
 import { t, locale } from './i18n.js';
 import { getExamples, setupCommands } from './examples.js';
 import { setupKeyPage } from './key-page.js';
@@ -8,7 +9,7 @@ const date = value => value ? new Intl.DateTimeFormat(locale(), { day: 'numeric'
 async function request(path, options = {}) {
   const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', 'X-Codex-API': '1', ...options.headers } });
   const data = await response.json();
-  if (!response.ok) throw Object.assign(new Error(t(data.error?.message) || t("Le service est indisponible.")), { status: response.status });
+  if (!response.ok) throw Object.assign(new Error(t(data.error?.message) || t("Le service est indisponible.")), { status: response.status, code: data.error?.code, resetsAt: data.error?.resets_at });
   return data;
 }
 function notice(text = '') { $('#notice').textContent = text; $('#notice').hidden = !text; }
@@ -20,6 +21,7 @@ async function copy(value, button) {
   } catch { notice(t("Copie automatique indisponible. Sélectionnez le texte pour le copier.")); }
 }
 function render() {
+  renderUsage(state.codex.usageLimit, $('#usage-notice'));
   const ready = state.codex.connected && state.codex.supported;
   $('#connection-title').textContent = ready ? t("Compte Codex connecté") : t("Codex à configurer");
   $('#connection-detail').textContent = t(state.codex.message);
@@ -55,6 +57,7 @@ async function refresh() {
   catch (error) {
     const locked = error.status === 401;
     state = undefined;
+    renderUsage(null, $('#usage-notice'));
     $('#create').disabled = true;
     $('#keys').replaceChildren();
     $('#empty').hidden = true;
@@ -96,7 +99,7 @@ $('#test-form').onsubmit = async event => {
   try {
     const result = await request('/v1/responses', { method: 'POST', signal: testController.signal, headers: { Authorization: `Bearer ${$('#test-key').value.trim()}` }, body: JSON.stringify({ model: 'codex', input: $('#test-prompt').value }) });
     $('#test-result').textContent = result.output_text; await refresh();
-  } catch (error) { $('#test-result').textContent = error.name === 'AbortError' ? t("Demande annulée.") : error.message; $('#test-result').classList.add('error'); }
+  } catch (error) { $('#test-result').textContent = error.name === 'AbortError' ? t("Demande annulée.") : error.message; $('#test-result').classList.add('error'); if (error.code?.startsWith('codex_')) await refresh(); }
   finally { button.disabled = false; button.textContent = t("Envoyer à Codex ↗"); testController = null; }
 };
 $('#confirm-revoke').onclick = async () => {
@@ -141,3 +144,5 @@ $('#guide-base-url').textContent = `${location.origin}/v1`;
 renderExample(); renderSetup();
 
 window.addEventListener('languagechange', () => { refresh(); renderExample(); renderSetup(); });
+
+setInterval(() => { if (!document.hidden && !$('#overview-page').hidden && !document.querySelector('dialog[open]')) refresh(); }, 5000);

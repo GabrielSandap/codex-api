@@ -155,3 +155,11 @@ La connexion reste gérée par Codex : aucun import ni extraction de ses jetons 
 Le code est publié sur [GitHub](https://github.com/GabrielSandap/codex-api) sous licence MIT. Le paquet n’est pas publié sur npm. L’implémentation utilise Node.js et prévoit les commandes d’ouverture du navigateur sur macOS, Windows et Linux. **Seul macOS a été testé en situation réelle à ce stade.**
 
 La faisabilité de ce prototype ne constitue pas une validation contractuelle pour tous les modes de distribution ou usages commerciaux.
+
+## Quota Codex épuisé
+
+Une limite d’usage reconnue renvoie HTTP **429** avec `error.code: "codex_quota_exhausted"`. Les clés restent valides. Le débit limité par Codex utilise `codex_rate_limited`, tandis que nos limites locales utilisent `gateway_rate_limited`.
+
+`error.resets_at` contient une date ISO UTC seulement si Codex fournit une date structurée valide ; sinon il vaut `null`. `Retry-After` est présent uniquement si cette date est future. Aucune heure n’est déduite d’un texte ambigu. Les erreurs non reconnues restent en 502.
+
+L’accueil et la page de clé affichent la dernière limite observée pour le compte. Une réponse réussie retire l’alerte. Actualiser l’interface ne lance pas de demande à Codex et ne confirme pas un retour du quota. L’alerte en mémoire disparaît au redémarrage ; les codes d’échec restent dans l’historique local. La passerelle ne relance pas automatiquement une génération en échec. Évitez les boucles de nouvelles tentatives dans vos programmes.

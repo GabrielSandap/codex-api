@@ -27,3 +27,10 @@ Native Windows/Linux Codex execution, sandboxing and storage permissions are not
 - Missing executable path verified: actionable instructions and non-zero exit, no installation performed.
 - Runtime offline compatibility probe verified on CLI 0.153.4, including a completed text response and rejected write-tool injection. Newer versions are covered by version-policy unit tests, not claimed as real-CLI validation.
 - No gateway was started and no real OpenAI request was made for this update.
+
+## Quota failure handling
+
+- Recognized CLI failure fixtures tested: usage-limit text, typed/embedded JSON quota errors, explicit reset timestamps, missing/malformed reset times, upstream throttling, network errors and model-text false positives.
+- HTTP integration verifies 429 codes, optional Retry-After, shared account notice, preserved keys, sanitized history, no automatic retry and recovery after a successful generation.
+- English home banner and French key-detail/history inspected with an isolated simulated runner. No real account quota was exhausted and no OpenAI request was used for these checks.
+- Recognition is conservative; unknown future CLI error formats remain generic failures. Reset dates are not inferred from natural-language error strings.

@@ -11,6 +11,7 @@
     <main>
     <div id="overview-page">
       <section class="intro"><div><p class="eyebrow">YOUR CODEX. YOUR ACCESS.</p><h1>API keys, made simple.</h1><p class="lede">Use Codex CLI in your application through a local API.</p></div><button class="primary" id="create" disabled><span aria-hidden="true">＋</span> Create a key</button></section>
+      <p id="usage-notice" class="notice" role="status" hidden></p>
       <p id="notice" class="notice" role="status" hidden></p>
       <section class="connection" aria-label="Connection"><div class="connection-state"><span class="status-icon" id="status-icon">◌</span><div><strong id="connection-title">Connecting to the service…</strong><p id="connection-detail">Checking Codex CLI</p></div></div><div class="endpoint"><span>API BASE URL</span><button id="copy-address" class="address" title="Copy address"><code id="base-url">—</code><span aria-hidden="true">⧉</span></button></div></section>
       <section class="keys-section"><div class="section-heading"><h2>Your keys <span id="key-count">—</span></h2><button id="refresh" class="text-button">Refresh ↻</button></div><div id="keys"></div><div id="empty" class="empty" hidden><span class="empty-symbol" aria-hidden="true">⌘</span><h3>Your API access.</h3><p>Create a key to authenticate requests from your application.<br>You can revoke it at any time.</p><button id="create-empty" class="text-button">Create my first key <span aria-hidden="true">↗</span></button></div></section>
@@ -48,6 +49,7 @@
     <section id="key-page" hidden aria-labelledby="key-title">
       <a href="#" class="back-link">← All keys</a>
       <div class="detail-heading"><div><p class="eyebrow">STATUS &amp; ANALYTICS</p><h1 id="key-title"></h1><p class="lede"><code id="detail-prefix"></code> <span class="badge" id="detail-status"></span></p></div><div class="detail-actions"><button class="secondary" id="detail-refresh">Refresh</button><button class="secondary" id="detail-test">Test</button><button class="secondary" id="detail-revoke">Revoke</button></div></div>
+      <p id="detail-usage" class="notice" role="status" hidden></p>
       <p id="detail-error" class="notice" role="status" hidden></p>
       <div class="detail-health"><div><strong id="detail-connection"></strong><p id="detail-last-call"></p></div><span id="detail-running"></span></div>
       <dl class="metrics"><div><dt>Tracked requests</dt><dd id="stat-total">—</dd></div><div><dt>Success rate</dt><dd id="stat-success">—</dd></div><div><dt>Failed / cancelled</dt><dd id="stat-failed">—</dd></div><div><dt>Average duration</dt><dd id="stat-duration">—</dd></div><div><dt>Reported tokens</dt><dd id="stat-tokens">—</dd></div></dl>

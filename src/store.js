@@ -35,7 +35,7 @@ export class KeyStore {
     if (!key) return null;
     return { key: this.public(key), analytics: key.analytics ?? null };
   }
-  record(key, { route, status, durationMs, usage, cancelled = false }) {
+  record(key, { route, status, durationMs, usage, errorCode, cancelled = false }) {
     const now = new Date().toISOString();
     const a = key.analytics ??= { since: now, historicalSuccesses: key.requests, total: 0, succeeded: 0, failed: 0, cancelled: 0, durationMs: 0, inputTokens: 0, outputTokens: 0, measuredUsage: 0, days: {}, recent: [] };
     cancelled ||= status === 499;
@@ -52,7 +52,7 @@ export class KeyStore {
     const daily = a.days[day] ??= { total: 0, succeeded: 0, failed: 0, cancelled: 0 };
     daily.total++; daily[success ? 'succeeded' : cancelled ? 'cancelled' : 'failed']++;
     for (const date of Object.keys(a.days).sort().slice(0, -30)) delete a.days[date];
-    a.recent.unshift({ at: now, route, status, cancelled, durationMs, tokens });
+    a.recent.unshift({ at: now, route, status, cancelled, durationMs, tokens, ...(['codex_quota_exhausted', 'codex_rate_limited'].includes(errorCode) ? { errorCode } : {}) });
     a.recent = a.recent.slice(0, 100);
     this.save();
   }

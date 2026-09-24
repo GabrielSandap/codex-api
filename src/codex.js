@@ -4,6 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyCodexFailure } from './codex-errors.js';
 import { supportsVersion, createCompatibilityCheck } from './compatibility.js';
 
 const exec = promisify(execFile);
@@ -80,7 +81,9 @@ export async function runCodex(prompt, { signal, timeoutMs = 120000 } = {}) {
         signal?.removeEventListener('abort', abort);
         if (failure) return reject(failure);
         const events = stdout.split('\n').flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } });
-        if (code !== 0 || events.some(e => e.type === 'turn.failed' || e.type === 'error')) return reject(new Error("Codex did not complete the request. Check its login and your account limits in the terminal."));
+        if (code !== 0 || events.some(e => e.type === 'turn.failed' || e.type === 'error')) {
+          return reject(classifyCodexFailure(events) || new Error("Codex did not complete the request. Check its login and your account limits in the terminal."));
+        }
         const text = events.filter(e => e.type === 'item.completed' && e.item?.type === 'agent_message').map(e => e.item.text).join('\n');
         if (!text) return reject(new Error("Codex returned no text."));
         const usage = events.findLast(e => e.type === 'turn.completed')?.usage;

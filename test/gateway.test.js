@@ -174,3 +174,55 @@ test('migration historique, rétention bornée et isolation entre clés', async 
   try { assert.equal(restarted.store.detail(key.id).analytics.total, 105); }
   finally { await restarted.close(); }
 });
+
+test('quota is a safe 429 shared across keys; success clears the notice without revoking keys', async t => {
+  const { CodexLimitError } = await import('../src/codex-errors.js');
+  let attempts = 0;
+  const reset = new Date(Date.now() + 60000).toISOString();
+  const app = await setup(t, async () => {
+    if (++attempts === 1) throw new CodexLimitError('codex_quota_exhausted', reset);
+    return { text: 'Recovered' };
+  });
+  const first = await app.create('First'), second = await app.create('Second');
+  const reply = await app.call('/v1/responses', { method: 'POST', token: first.token, data: { input: 'private prompt' } });
+  assert.equal(reply.status, 429);
+  assert.equal(reply.data.error.code, 'codex_quota_exhausted');
+  assert.equal(reply.data.error.resets_at, reset);
+  assert.ok(Number(reply.response.headers.get('retry-after')) > 0);
+  const detail = await app.call(`/admin/keys/${first.key.id}`, { cookie: app.cookie });
+  assert.equal(detail.data.analytics.recent[0].errorCode, 'codex_quota_exhausted');
+  const other = await app.call(`/admin/keys/${second.key.id}`, { cookie: app.cookie });
+  assert.equal(other.data.codex.usageLimit.code, 'codex_quota_exhausted');
+  assert.equal(other.data.key.status, 'active');
+  assert.equal(attempts, 1); // No automatic retry by state polling.
+  const success = await app.call('/v1/chat/completions', { method: 'POST', token: second.token, data: { messages: [{ role: 'user', content: 'Retry' }] } });
+  assert.equal(success.status, 200);
+  assert.equal((await app.call('/admin/state', { cookie: app.cookie })).data.codex.usageLimit, null);
+  assert.ok(!(await readFile(join(app.dataDir, 'keys.json'), 'utf8')).includes('private prompt'));
+});
+
+test('quota without reset omits Retry-After and generic failures remain 502', async t => {
+  const { CodexLimitError } = await import('../src/codex-errors.js');
+  let attempts = 0;
+  const app = await setup(t, async () => { if (++attempts === 1) throw new CodexLimitError('codex_quota_exhausted'); throw new Error('Connection failed'); });
+  const { token } = await app.create();
+  const call = () => app.call('/v1/responses', { method: 'POST', token, data: { input: 'Hello' } });
+  const limit = await call();
+  assert.equal(limit.data.error.resets_at, null);
+  assert.equal(limit.response.headers.get('retry-after'), null);
+  assert.equal((await call()).status, 502);
+});
+
+test('upstream rate limits and gateway throttling expose different codes', async t => {
+  const { CodexLimitError } = await import('../src/codex-errors.js');
+  const app = await setup(t, async () => { throw new CodexLimitError('codex_rate_limited'); });
+  const { token } = await app.create();
+  for (let i = 0; i < 10; i++) {
+    const reply = await app.call('/v1/responses', { method: 'POST', token, data: { input: 'Hello' } });
+    assert.equal(reply.status, 429);
+    assert.equal(reply.data.error.code, 'codex_rate_limited');
+  }
+  const local = await app.call('/v1/responses', { method: 'POST', token, data: { input: 'Hello' } });
+  assert.equal(local.status, 429);
+  assert.equal(local.data.error.code, 'gateway_rate_limited');
+});

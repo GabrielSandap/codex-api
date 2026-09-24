@@ -1,3 +1,4 @@
+import { renderUsage } from './usage.js';
 import { t, locale } from './i18n.js';
 export function setupKeyPage({ request, onTest, onRevoke }) {
   const $ = selector => document.querySelector(selector);
@@ -9,6 +10,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
   const resultLabel = status => status >= 200 && status < 300 ? t("Réussi") : status === 499 ? t("Annulé") : t("Échec");
   function draw(data) {
     currentKey = data.key;
+    renderUsage(data.codex.usageLimit, $('#detail-usage'));
     const key = data.key, a = data.analytics;
     $('#key-title').textContent = key.name;
     $('#detail-prefix').textContent = `${key.prefix}••••`;
@@ -49,7 +51,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
     $('#request-rows').replaceChildren();
     for (const item of a?.recent ?? []) {
       const row = document.createElement('tr');
-      const values = [datetime(item.at), item.route, `${item.cancelled ? t("Annulé") : resultLabel(item.status)} · ${item.status}`, duration(item.durationMs), item.tokens ? `${number(item.tokens.input)} / ${number(item.tokens.output)}` : t("Non rapportés")];
+      const values = [datetime(item.at), item.route, `${item.cancelled ? t("Annulé") : item.errorCode === 'codex_quota_exhausted' ? t('Quota exhausted') : item.errorCode === 'codex_rate_limited' ? t('Codex rate limit') : resultLabel(item.status)} · ${item.status}`, duration(item.durationMs), item.tokens ? `${number(item.tokens.input)} / ${number(item.tokens.output)}` : t("Non rapportés")];
       values.forEach((text, index) => { const cell = document.createElement('td'); cell.textContent = text; if (index === 2) cell.className = item.status < 300 ? 'result-success' : 'result-failure'; row.append(cell); });
       $('#request-rows').append(row);
     }
@@ -63,6 +65,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
     const ticket = ++generation; pending = true;
     if (id !== selectedId) {
       selectedId = id; currentKey = null;
+      renderUsage(null, $('#detail-usage'));
       $('#key-title').textContent = t("Chargement…");
       $('#detail-prefix').textContent = ''; $('#detail-status').textContent = '';
       $('#detail-test').disabled = true; $('#detail-revoke').disabled = true;

@@ -3,12 +3,14 @@ import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { KeyStore, secret, equal } from './store.js';
 import { runCodex, codexStatus } from './codex.js';
+import { CodexLimitError } from './codex-errors.js';
 import { lockDirectory } from './lock.js';
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 const fail = (status, message) => { throw new HttpError(status, message); };
 const assets = new Map([
   ['/', ['text/html; charset=utf-8', readFileSync(new URL('../public/index.html', import.meta.url))]],
+  ['/usage.js', ['text/javascript; charset=utf-8', readFileSync(new URL('../public/usage.js', import.meta.url))]],
   ['/i18n.js', ['text/javascript; charset=utf-8', readFileSync(new URL('../public/i18n.js', import.meta.url))]],
   ['/translations.js', ['text/javascript; charset=utf-8', readFileSync(new URL('../public/translations.js', import.meta.url))]],
   ['/logo.svg', ['image/svg+xml', readFileSync(new URL('../public/logo.svg', import.meta.url))]],
@@ -63,13 +65,13 @@ export async function createGateway({ dataDir, port = 4317, runner = runCodex, s
   let origin, host;
   const active = new Map(), rate = new Map();
   const startedAt = new Date().toISOString();
-  let statusCache, statusAt = 0;
+  let statusCache, statusAt = 0, usageLimit = null;
   const getStatus = async () => {
     if (!statusCache || Date.now() - statusAt > 5000) { statusCache = await statusProvider(); statusAt = Date.now(); }
-    return statusCache;
+    return { ...statusCache, usageLimit };
   };
   const server = createServer(async (req, res) => {
-    let trackedKey, trackedRoute, trackedUsage, trackedCancelled = false;
+    let trackedKey, trackedRoute, trackedUsage, trackedErrorCode, trackedCancelled = false;
     const requestStarted = performance.now();
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -151,6 +153,7 @@ export async function createGateway({ dataDir, port = 4317, runner = runCodex, s
         try {
           const result = await runner(prompt, { signal: controller.signal });
           if (controller.signal.aborted || !store.authenticate(token)) fail(401, "Request cancelled: this key is no longer active.");
+          usageLimit = null;
           trackedUsage = result.usage;
           const usage = result.usage ? { prompt_tokens: result.usage.input_tokens || 0, completion_tokens: result.usage.output_tokens || 0, total_tokens: (result.usage.input_tokens || 0) + (result.usage.output_tokens || 0) } : undefined;
           if (path.endsWith('/chat/completions')) json(200, { id: `chatcmpl-${id}`, object: 'chat.completion', created: Math.floor(now / 1000), model: 'codex', choices: [{ index: 0, message: { role: 'assistant', content: result.text }, finish_reason: 'stop' }], usage });
@@ -158,16 +161,23 @@ export async function createGateway({ dataDir, port = 4317, runner = runCodex, s
         } catch (error) {
           trackedCancelled = controller.signal.aborted;
           if (error instanceof HttpError) throw error;
+          if (error instanceof CodexLimitError) {
+            usageLimit = { code: error.code, resetsAt: error.resetsAt, observedAt: new Date().toISOString() };
+            trackedErrorCode = error.code;
+            if (error.resetsAt && Date.parse(error.resetsAt) > Date.now()) res.setHeader('Retry-After', String(Math.ceil((Date.parse(error.resetsAt) - Date.now()) / 1000)));
+            json(429, { error: { type: 'codex_usage_error', code: error.code, message: error.message, resets_at: error.resetsAt } });
+            return;
+          }
           fail(502, error.message || "Codex is unavailable.");
         } finally { active.delete(id); clearTimeout(expiry); res.off('close', cancel); finish(); }
         return;
       }
       fail(404, "Route not found.");
     } catch (error) {
-      json(error.status || 500, { error: { message: error.status ? error.message : 'Erreur interne du service local.', type: 'gateway_error' } });
+      json(error.status || 500, { error: { message: error.status ? error.message : 'Erreur interne du service local.', type: 'gateway_error', ...(error.status === 429 ? { code: 'gateway_rate_limited' } : {}) } });
     } finally {
       if (trackedKey) {
-        try { store.record(trackedKey, { route: trackedRoute, status: res.destroyed && !res.writableEnded ? 499 : res.statusCode, durationMs: Math.round(performance.now() - requestStarted), usage: trackedUsage, cancelled: trackedCancelled }); }
+        try { store.record(trackedKey, { route: trackedRoute, status: res.destroyed && !res.writableEnded ? 499 : res.statusCode, durationMs: Math.round(performance.now() - requestStarted), usage: trackedUsage, errorCode: trackedErrorCode, cancelled: trackedCancelled }); }
         catch { console.error("Unable to save local metrics for this request."); }
       }
     }

@@ -116,6 +116,33 @@ For Responses, read `output_text`; for Chat Completions, read `choices[0].messag
 
 This is a **text-only subset**, not full OpenAI API compatibility. Unknown options, tools, files, images, streaming and arbitrary model overrides are rejected. Each request is independent. Chat messages are serialized into one CLI prompt, so native API role semantics are not reproduced. The `codex` alias uses a restricted `gpt-6-astra` profile.
 
+## When Codex usage runs out
+
+Recognized quota failures return **HTTP 429**, not a generic 502:
+
+```json
+{
+  "error": {
+    "type": "codex_usage_error",
+    "code": "codex_quota_exhausted",
+    "message": "Codex usage limit reached. Your API key remains valid. Wait for your account allowance to reset before retrying.",
+    "resets_at": null
+  }
+}
+```
+
+- `codex_quota_exhausted`: account usage exhausted; wait and check your account usage before retrying.
+- `codex_rate_limited`: temporary throttling reported by Codex.
+- `gateway_rate_limited`: this gateway's local request/concurrency limit.
+
+A validated structured reset timestamp is returned as ISO UTC in `resets_at`. If it is in the future, `Retry-After` contains the remaining seconds. Otherwise the field is `null` and no reset time is guessed from ambiguous human-readable text. Unknown CLI errors remain HTTP 502; not every CLI version exposes a recognizable quota signal.
+
+The gateway never automatically resubmits a failed generation. Clients should handle `error.code`, avoid tight retry loops, and respect a supplied `Retry-After`. Keys are not revoked when usage runs out.
+
+The home and key-detail pages show the last observed account limit, shared across keys, with its reset time when available. A successful generation clears that notice. Refreshing the page only reads local status; it does not spend quota or prove that allowance has returned. The notice is held in memory until restart; sanitized failure codes remain in the local request history. This is not a live account balance.
+
+CLI failures are read from [Codex JSONL events](https://learn.chatgpt.com/docs/non-interactive-mode). Raw provider errors, URLs and account details are never returned to clients or saved in analytics.
+
 ## Key status and analytics
 
 Click a key’s name to view its status, expiration, active requests, success rate, duration and reported tokens. The visible detail page refreshes every 5 seconds. The gateway retains the last 100 request events and 30 daily buckets, plus cumulative counters. Earlier requests without detailed metrics are labeled separately.
@@ -132,7 +159,7 @@ No prompts, responses, secrets or raw error messages are stored in these analyti
 | Account disconnected | Run `codex login` in your terminal and sign in with ChatGPT. |
 | HTTP 401 | Check the key: missing, invalid, expired or revoked. |
 | HTTP 400 | Send only supported text fields and disable streaming. |
-| HTTP 429 | Wait and respect `Retry-After`: 10 requests/minute/key and 2 concurrent requests globally. |
+| HTTP 429 | Inspect `error.code`: account quota, upstream throttling or local rate/concurrency limits. Respect `Retry-After` when supplied. |
 | HTTP 502 | Check Internet, Codex login, model access and account allowance. The CLI may have failed or reached the 120-second timeout. |
 | Port already in use | Stop the previous instance or choose another port. Only one instance can use the same key directory. |
 
