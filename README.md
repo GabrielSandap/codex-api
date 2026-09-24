@@ -10,7 +10,7 @@ Create, revoke and monitor local access keys. Your program sends a text request 
 ## Requirements
 
 - **Node.js 22 or later**, npm and Git.
-- **Codex CLI exactly 0.153.4**, signed in with ChatGPT.
+- **Codex CLI 0.153.4 or newer (stable)**, signed in with ChatGPT.
 - A ChatGPT account with Codex access **and access to `gpt-6-astra`** (the model used by this preview). A successful login alone does not prove model access or available quota.
 - An Internet connection. The gateway runs locally, but Codex sends requests to OpenAI.
 - Keep your computer **powered on and awake**, and the gateway running. Closing the terminal or putting the computer to sleep interrupts availability. The browser may be closed after setup.
@@ -19,19 +19,34 @@ Create, revoke and monitor local access keys. Your program sends a text request 
 
 ## Install and start
 
-Install Node.js from [nodejs.org](https://nodejs.org/) and Git from [git-scm.com](https://git-scm.com/), then:
+First check what is already installed:
 
 ```sh
-npm install --global @openai/codex@0.153.4
-codex login
+node --version
 codex --version
+codex login status
+```
 
+Keep Node.js if it is **22+**, keep your existing stable Codex if it is **0.153.4+**, and keep your ChatGPT login if it is already connected. Do not reinstall or downgrade working prerequisites.
+
+- Node.js missing or older than 22: install/update it from [nodejs.org](https://nodejs.org/).
+- Codex missing or older than 0.153.4: run `npm install --global @openai/codex` to install the current version. This is an explicit global installation/update, not performed automatically by this project.
+- Codex installed outside PATH: set `CODEX_API_CODEX_BIN` to its executable path.
+- Not connected with ChatGPT: run `codex login` (or your configured executable). No need to log in again if already connected.
+- Git missing: install it from [git-scm.com](https://git-scm.com/).
+
+Then run each command on its own line:
+
+```sh
 git clone https://github.com/GabrielSandap/codex-api.git
 cd codex-api
+npm run setup
 npm start
 ```
 
-No runtime npm dependencies or build step are required for this project. The pinned CLI version is intentional: unsupported versions are rejected until their capabilities are validated. If you already use another Codex version, installing this one globally changes your CLI version; use a separate installation and `CODEX_API_CODEX_BIN` instead if needed.
+`npm run setup` is a **read-only prerequisite check**: it detects Node.js, Codex and the existing login, prints specific instructions for missing requirements, and never installs, replaces or signs in to anything. Continue to `npm start` once setup reports ready. No runtime npm dependencies or build step are required.
+
+Newer CLI versions are eligible, not automatically trusted. An offline compatibility probe checks the restricted tool manifest, rejection of an injected write-tool call, and successful text output. Requests are blocked if it fails or times out. Results are shared per detected version for the running process; restart after resolving a failed check. These probes do not guarantee compatibility with every future release or replace a full platform security audit.
 
 The browser opens a **private management link**. Create a key and copy its secret immediately: it is shown only once. The interface starts in English; select **Français** in the header to switch. Your browser remembers the choice.
 
@@ -113,7 +128,7 @@ No prompts, responses, secrets or raw error messages are stored in these analyti
 | --- | --- |
 | Management locked | Open the private terminal link in this browser. Restart the service if the link is expired/used. Your keys remain saved. |
 | Connection refused / timeout | Wake the computer, start the service, and check address and port. |
-| CLI missing / wrong version | Check `codex --version`; install exactly `0.153.4`. Do not bypass the version check. |
+| CLI missing / wrong version | Check `codex --version`; use a stable version ≥ `0.153.4`, then run `npm run setup`. Do not bypass a failed compatibility check. |
 | Account disconnected | Run `codex login` in your terminal and sign in with ChatGPT. |
 | HTTP 401 | Check the key: missing, invalid, expired or revoked. |
 | HTTP 400 | Send only supported text fields and disable streaming. |
@@ -141,12 +156,13 @@ To update: stop the service, run `git pull --ff-only` in the repository, review 
 ## Development
 
 ```sh
+npm run setup
 npm test
 npm run check
 npm run audit:tools
 npm run audit:denial
 ```
 
-HTTP tests use a simulated runner and do not consume quota. The two audits require the pinned Codex CLI and run against a local mock provider, without OpenAI authentication. The first inspects the actual tool manifest; the second injects an `apply_patch` call and verifies explicit rejection and no sentinel file creation.
+HTTP tests use a simulated runner and do not consume quota. The two audits require a compatible Codex CLI and run against a local mock provider, without OpenAI authentication. The first inspects the actual tool manifest; the second injects an `apply_patch` call and verifies explicit rejection and no sentinel file creation.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [validation notes](QA.md) and [MIT license](LICENSE). Do not post credentials, management links, key files or private prompts in issues.

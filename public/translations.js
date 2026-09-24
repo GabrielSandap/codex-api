@@ -148,7 +148,6 @@ export const translations = {
   "Impossible d’actualiser le statut": "Unable to refresh status",
   "Les données affichées peuvent être anciennes.": "Displayed data may be out of date.",
   "Clé indisponible": "Key unavailable",
-  "Version de Codex non validée : utilise 0.153.4 pour ce prototype.": "Unvalidated Codex version: use 0.153.4 for this preview.",
   "Compte ChatGPT connecté": "ChatGPT account connected",
   "Connecte Codex avec ton compte ChatGPT depuis le terminal.": "Sign in to Codex with your ChatGPT account from the terminal.",
   "Codex CLI est introuvable. Installe-le, puis connecte ton compte ChatGPT.": "Codex CLI was not found. Install it, then sign in with your ChatGPT account.",
@@ -214,6 +213,8 @@ export const translations = {
   "Codex est indisponible.": "Codex is unavailable.",
   "Prérequis": "Requirements",
   "Gardez cet ordinateur allumé, éveillé et connecté à Internet, avec Codex API lancé dans le terminal. Vous pouvez fermer cette page après la configuration.": "Keep this computer powered on, awake and connected to the Internet, with Codex API running in the terminal. You can close this page after setup.",
-  "Node.js 22+, Codex CLI 0.153.4 connecté avec ChatGPT et accès au modèle gpt-6-astra sont requis. Une connexion enregistrée ne garantit pas du quota disponible.": "Requires Node.js 22+, Codex CLI 0.153.4 signed in with ChatGPT and access to gpt-6-astra. A saved login does not guarantee available allowance.",
-  "Si l’ordinateur dort ou si le service est arrêté, les appels échouent ou expirent. Réveillez-le et relancez le service avant de réessayer.": "If the computer sleeps or the service stops, requests fail or time out. Wake it and restart the service before retrying."
+  "Si l’ordinateur dort ou si le service est arrêté, les appels échouent ou expirent. Réveillez-le et relancez le service avant de réessayer.": "If the computer sleeps or the service stops, requests fail or time out. Wake it and restart the service before retrying.",
+  "Codex CLI stable 0.153.4 ou supérieur est requis. Mettez à jour uniquement si votre version est plus ancienne.": "Codex CLI 0.153.4 or newer (stable) is required. Update only if your installed version is older.",
+  "Le contrôle de compatibilité de Codex a échoué. Les appels sont bloqués. Lancez npm run audit:denial pour diagnostiquer, puis redémarrez la passerelle après correction.": "Codex compatibility check failed. Requests are blocked. Run npm run audit:denial for diagnostics, then restart the gateway after resolving the issue.",
+  "Node.js 22+, Codex CLI stable compatible 0.153.4+ connecté avec ChatGPT et accès à gpt-6-astra sont requis. Lancez npm run setup pour vérifier les prérequis existants sans les réinstaller. Une connexion enregistrée ne garantit pas du quota disponible.": "Requires Node.js 22+, a compatible stable Codex CLI 0.153.4+ signed in with ChatGPT and access to gpt-6-astra. Run npm run setup to check existing prerequisites without reinstalling them. A saved login does not guarantee available allowance."
 };

@@ -4,6 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { supportsVersion, createCompatibilityCheck } from './compatibility.js';
 
 const exec = promisify(execFile);
 export const CODEX_BIN = process.env.CODEX_API_CODEX_BIN || 'codex';
@@ -17,14 +18,19 @@ export function codexEnvironment(source = process.env) {
   return env;
 }
 
+const checkCompatibility = createCompatibilityCheck(() => exec(process.execPath,
+  [fileURLToPath(new URL('../scripts/audit-tools.mjs', import.meta.url)), '--probe'],
+  { env: { ...codexEnvironment(), CODEX_API_CODEX_BIN: CODEX_BIN }, timeout: 20000, maxBuffer: 128 * 1024 }
+));
+
 export async function codexStatus() {
   try {
     const { stdout: version } = await exec(CODEX_BIN, ['--version'], { env: codexEnvironment(), timeout: 5000 });
     const result = await exec(CODEX_BIN, ['login', 'status'], { env: codexEnvironment(), timeout: 5000 }).catch(() => null);
     const connected = !!result && /Logged in using ChatGPT/i.test(`${result.stdout}\n${result.stderr}`);
-    // Fail closed on CLI versions whose feature configuration was not tested.
-    const supported = /^codex-cli 0\.153\.4\s*$/.test(version.trim());
-    return { installed: true, connected, supported, version: version.trim(), message: !supported ? "Unvalidated Codex version: use 0.153.4 for this preview." : connected ? "ChatGPT account connected" : "Sign in to Codex with your ChatGPT account from the terminal." };
+    const minimumMet = supportsVersion(version.trim());
+    const supported = minimumMet && await checkCompatibility(version.trim());
+    return { installed: true, connected, supported, version: version.trim(), message: !supported ? (minimumMet ? "Codex compatibility check failed. Requests are blocked. Run npm run audit:denial for diagnostics, then restart the gateway after resolving the issue." : "Codex CLI 0.153.4 or newer (stable) is required. Update only if your installed version is older.") : connected ? "ChatGPT account connected" : "Sign in to Codex with your ChatGPT account from the terminal." };
   } catch {
     return { installed: false, connected: false, supported: false, version: null, message: "Codex CLI was not found. Install it, then sign in with your ChatGPT account." };
   }

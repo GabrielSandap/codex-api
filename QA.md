@@ -19,3 +19,11 @@ Per-key analytics were checked separately with 3 simulated requests (2 successes
 ## Limits
 
 Native Windows/Linux Codex execution, sandboxing and storage permissions are not certified. The CI matrix checks the mocked gateway, not the complete Codex integration. No independent security audit has been performed. Real-request success does not establish compatibility with every account, subscription or third-party client.
+
+## Existing prerequisites and minimum CLI version
+
+- 14 tests pass, including minimum-version comparisons, rejecting pre-release/unknown versions, sharing concurrent compatibility probes and denying failed probes.
+- `npm run setup` verified with installed Node.js 22.13.0, Codex CLI 0.153.4 and an existing ChatGPT login: no software reinstall or login prompt.
+- Missing executable path verified: actionable instructions and non-zero exit, no installation performed.
+- Runtime offline compatibility probe verified on CLI 0.153.4, including a completed text response and rejected write-tool injection. Newer versions are covered by version-policy unit tests, not claimed as real-CLI validation.
+- No gateway was started and no real OpenAI request was made for this update.

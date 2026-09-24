@@ -6,17 +6,34 @@ Projet indépendant, non affilié à OpenAI. Interface en anglais par défaut ; 
 
 ## Installer depuis GitHub
 
-Installez Node.js 22+ et Git, puis :
+Vérifiez d’abord les outils et la connexion existants :
 
 ```sh
-npm install --global @openai/codex@0.153.4
-codex login
+node --version
+codex --version
+codex login status
+```
+
+Conservez Node.js **22+**, Codex stable **0.153.4+** et la connexion ChatGPT déjà active. Ne réinstallez pas et ne rétrogradez pas les outils compatibles.
+
+- Node absent ou trop ancien : installez/mettez à jour Node.js depuis https://nodejs.org/.
+- Codex absent ou trop ancien : `npm install --global @openai/codex` installe la version actuelle. Cette mise à jour globale reste une action explicite de votre part.
+- Codex hors du PATH : configurez `CODEX_API_CODEX_BIN` avec son chemin.
+- Compte non connecté avec ChatGPT : `codex login`, uniquement si nécessaire.
+- Git doit aussi être installé pour cloner le dépôt.
+
+Puis, une commande par ligne :
+
+```sh
 git clone https://github.com/GabrielSandap/codex-api.git
 cd codex-api
+npm run setup
 npm start
 ```
 
-Cette installation globale remplace une autre version de Codex déjà installée. Pour conserver votre version, utilisez une installation séparée via `CODEX_API_CODEX_BIN`. Le modèle `gpt-6-astra` doit être accessible avec votre compte.
+`npm run setup` détecte les prérequis, la connexion existante et la compatibilité. Il ne modifie aucune installation et ne déclenche pas de connexion. Corrigez les points signalés avant de démarrer.
+
+Les versions stables ≥ 0.153.4 sont acceptées seulement après un contrôle hors ligne du manifeste des outils, du rejet d’une tentative d’écriture et du retour d’une réponse texte. Un échec bloque les appels ; redémarrez après correction. Cela ne garantit pas toutes les versions futures. Le modèle `gpt-6-astra` doit rester accessible avec votre compte.
 
 Exemples prêts à lancer : [Python](../examples/request.py), [JavaScript](../examples/request.mjs), [PHP](../examples/request.php), [cURL](../examples/request.sh). Définissez `CODEX_LOCAL_KEY` selon les instructions dans l’application avant de les lancer.
 
@@ -27,12 +44,12 @@ Prototype 0.1 : créer une clé → la copier dans une application → envoyer d
 
 ## Démarrer
 
-Prérequis : **Node.js 22+**, **Codex CLI 0.153.4**, compte ChatGPT avec accès à Codex et au modèle utilisé. Cette version est volontairement verrouillée sur la version CLI testée : une autre version bloque les demandes jusqu’à validation de ses capacités.
+Prérequis : **Node.js 22+**, **Codex CLI stable 0.153.4+**, compte ChatGPT avec accès à Codex et au modèle utilisé. Un contrôle de compatibilité hors ligne est obligatoire avant d’autoriser les demandes.
 
 Depuis le dossier du projet :
 
 ```sh
-codex login
+npm run setup
 npm start
 ```
 

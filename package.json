@@ -15,7 +15,8 @@
     "test": "node --test test/*.test.js",
     "audit:tools": "node scripts/audit-tools.mjs",
     "audit:denial": "node scripts/audit-tools.mjs --probe",
-    "check": "node --check src/server.js && node --check src/codex.js && node --check public/app.js && node --check public/examples.js && node --check public/key-page.js && node --check public/i18n.js && node --check public/translations.js"
+    "check": "node --check src/server.js && node --check src/codex.js && node --check public/app.js && node --check public/examples.js && node --check public/key-page.js && node --check public/i18n.js && node --check public/translations.js && node --check src/compatibility.js && node --check scripts/setup.cjs && node --check scripts/audit-tools.mjs && node --check src/cli.js",
+    "setup": "node scripts/setup.cjs"
   },
   "license": "MIT",
   "repository": {

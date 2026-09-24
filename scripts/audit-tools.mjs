@@ -39,7 +39,7 @@ const server = createServer(async (req, res) => {
         event('response.completed', { response });
         res.end(); return;
       }
-    } catch { console.error('Unable to parse audit payload'); }
+    } catch { unsafe = true; console.error('Unable to parse audit payload'); }
   }
   res.writeHead(400, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: { message: 'Offline audit complete', type: 'invalid_request_error' } }));
@@ -48,18 +48,23 @@ try {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const args = buildArgs(directory);
   args.splice(args.length - 1, 0, '-c', 'model_provider="audit"', '-c', `model_providers.audit={name="audit",base_url="http://127.0.0.1:${server.address().port}/v1",wire_api="responses",requires_openai_auth=false}`);
-  child = spawn(CODEX_BIN, args, { env: codexEnvironment(), cwd: directory, stdio: ['pipe', 'ignore', 'pipe'] });
-  let diagnostics = '';
-  child.stderr.on('data', chunk => { diagnostics += chunk; });
+  child = spawn(CODEX_BIN, args, { env: codexEnvironment(), cwd: directory, stdio: ['pipe', 'pipe', 'pipe'] });
+  let output = '';
+  child.stdout.on('data', chunk => { output = (output + chunk).slice(-65536); });
+  child.stderr.resume(); // Do not print CLI diagnostics: they may contain private context.
   child.stdin.end('Offline capability audit.');
   const timer = setTimeout(() => child.kill('SIGKILL'), 15000);
-  await new Promise((resolve, reject) => { child.once('close', resolve); child.once('error', reject); });
-  clearTimeout(timer);
-  if (!captured || unsafe) { console.error('Capability audit failed: unexpected execution or access capability.'); console.error(diagnostics.slice(-2000)); process.exitCode = 1; }
+  let exitCode;
+  try { exitCode = await new Promise((resolve, reject) => { child.once('close', resolve); child.once('error', reject); }); }
+  finally { clearTimeout(timer); }
+  if (!captured || unsafe) { console.error('Capability audit failed: unexpected execution or access capability.'); process.exitCode = 1; }
   if (probe) {
     let written = false;
     try { await readFile(canary); written = true; } catch (e) { if (e.code !== 'ENOENT') throw e; }
     console.log(JSON.stringify({ injectedToolRequests: requests, rejected, unauthorizedFileCreated: written }));
-    if (written || requests < 2 || !rejected) process.exitCode = 1;
+    const events = output.split('\n').flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } });
+    const completed = events.some(event => event.type === 'turn.completed');
+    const response = events.some(event => event.type === 'item.completed' && event.item?.type === 'agent_message' && event.item.text === 'Probe finished.');
+    if (written || requests < 2 || !rejected || exitCode !== 0 || !completed || !response) process.exitCode = 1;
   }
 } finally { server.closeAllConnections(); server.close(); await rm(directory, { recursive: true, force: true }); }

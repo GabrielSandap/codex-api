@@ -1,6 +1,6 @@
 # Security policy and limitations
 
-This is a local preview, not a certified product. It has not had an independent security audit. Only the pinned CLI profile on macOS has been validated locally. Native Windows and Linux isolation, permissions and process cancellation need dedicated validation.
+This is a local preview, not a certified product. It has not had an independent security audit. The profile was validated with CLI 0.153.4 on macOS; newer stable versions require passing the runtime offline probe. Native Windows and Linux isolation, permissions and process cancellation need dedicated validation.
 
 ## Reporting
 
@@ -10,7 +10,7 @@ Use this repository’s **Security → Report a vulnerability** private reportin
 
 The gateway process, Codex CLI and your OS user account are trusted. Client keys cannot administer the service. Incoming requests and prompts are untrusted. Other browser origins must not control it.
 
-The text profile removes access/execution tools from the manifest sent to the model; it does not rely only on a system prompt. A read-only sandbox provides another layer but does not by itself prevent reads. The model catalogue and CLI version are pinned. Do not remove the version check to work around incompatibility.
+The text profile removes access/execution tools from the manifest sent to the model; it does not rely only on a system prompt. A read-only sandbox provides another layer but does not by itself prevent reads. The model catalogue is pinned. Stable CLI versions 0.153.4+ must pass the runtime offline compatibility probe; a version number alone is not sufficient. Do not bypass this probe.
 
 Local malware running as the same OS user can read process memory, change the program or access Codex credentials. This project does not protect a compromised computer. HTTP loopback is not encrypted; never tunnel or expose the gateway to a network. Windows storage protection depends on user-profile ACLs and is not yet validated.
 

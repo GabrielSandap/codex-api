@@ -2,11 +2,15 @@
 import { spawn } from 'node:child_process';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { createGateway } from './server.js';
+if (Number(process.versions.node.split('.')[0]) < 22) {
+  console.error('Node.js 22+ is required. Update Node.js; no installation was changed.');
+  process.exit(1);
+}
+const { createGateway } = await import('./server.js');
 
 const args = process.argv.slice(2);
 if (args.includes('--help')) {
-  console.log('Codex API — local gateway\n\n  npm start\n  npm start -- --no-open\n  npm start -- --port 4318\n\nRequires Node.js 22+ and Codex CLI 0.153.4 signed in with ChatGPT.\nCtrl+C stops the service.');
+  console.log('Codex API — local gateway\n\n  npm start\n  npm start -- --no-open\n  npm start -- --port 4318\n\nRequires Node.js 22+ and Codex CLI 0.153.4+ (offline compatibility check required), signed in with ChatGPT.\nCtrl+C stops the service.');
   process.exit(0);
 }
 let port = 4317, autoOpen = true;
