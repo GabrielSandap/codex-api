@@ -43,9 +43,9 @@ The command stays running and opens the management page. Do not install a backgr
 
 Guide the user to create a key in the browser and copy it once. Do not substitute the management token for an API key or extract keys from local storage.
 
-For the simplest personal demonstration, copy `examples/simple.py` to a personal folder outside the checkout. Leave its placeholder for the user to replace privately. Do not request that they paste the secret into chat. For a shared project use the environment-variable examples instead. Never put a real secret into a commit, screenshot or completion report.
+For the simplest personal demonstration, copy `examples/simple.mjs` to a personal folder outside the checkout: Node.js is already required. If the user prefers Python, copy `examples/simple.py` instead. Leave its placeholder for the user to replace privately. Do not request that they paste the secret into chat. For a shared project use the environment-variable examples instead. Never put a real secret into a commit, screenshot or completion report.
 
-Check Python 3 availability. Run the personal example only as part of the user's requested first test; explain that this is a real Codex request consuming their account allowance. Report the actual outcome. Do not repeatedly retry failed generations or use a mock response as proof of real account access.
+Use Node.js for the JavaScript example; check Python 3 availability only if Python was selected. Run the personal example only as part of the user's requested first test; explain that this is a real Codex request consuming their account allowance. Report the actual outcome. Do not repeatedly retry failed generations or use a mock response as proof of real account access.
 
 For another client, configure:
 

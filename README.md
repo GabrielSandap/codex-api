@@ -18,7 +18,7 @@ Copy this into your agent:
 Help me install and use https://github.com/GabrielSandap/codex-api on this computer.
 Read docs/agent-setup.md in that repository and follow its setup checklist.
 Reuse compatible Node.js, Codex CLI and my existing ChatGPT login.
-Help me create a local API key and run the simple Python example.
+Help me create a local API key and run the simple JavaScript example with Node.js.
 Keep credentials private and report any checks that could not be completed.
 ```
 
@@ -48,23 +48,30 @@ The management page opens in your browser. Keep this terminal running. No depend
 
 #### 2. Create a key
 
-Click **Create a key**, give it a name and copy the secret. It is shown only once. The interface is in English by default; choose **Français** in the header if preferred.
+Click **Create a key**, give it a name and copy the secret. It is shown only once. The interface is in English by default; choose **FR** in the header if preferred.
 
 **Management locked?** Open the private link printed in the terminal. If it has expired or was already used in another browser, stop the service with `Ctrl+C` and start it again to get a new link. Your saved keys remain available.
 
-#### 3. Try a Python file
+#### 3. Run your first example
 
-With Python 3 installed, copy [examples/simple.py](examples/simple.py) to a personal folder **outside this repository**. Open your copy, replace `PASTE_YOUR_LOCAL_KEY_HERE` with your key, and save it. You can also change the question.
+**Choose just one file.** JavaScript is the easiest option if you have no preference: Node.js is already installed for Codex API.
 
-Run that file from your editor, or open another terminal in its folder:
+| Language | File | Run from the file’s folder | Requirements |
+| --- | --- | --- | --- |
+| JavaScript | [simple.mjs](examples/simple.mjs) | `node simple.mjs` | Node.js 22+, already used by the app |
+| Python | [simple.py](examples/simple.py) | `python3 simple.py` (Windows: `py simple.py`) | Python 3 |
+| PHP | [simple.php](examples/simple.php) | `php simple.php` | PHP 8+ with the cURL extension |
+| cURL | [simple.sh](examples/simple.sh) | `sh simple.sh` | macOS/Linux shell or Windows Git Bash, cURL 7.76+ |
 
-```sh
-python3 simple.py
-```
+1. Open the file link, then click **Download raw file** on GitHub. Save it in a personal folder **outside this repository**.
+2. Open it in your code editor, replace `PASTE_YOUR_LOCAL_KEY_HERE` with your key, and save. Optionally change the question (the `input` text for cURL).
+3. Keep the app’s terminal running. Open **another terminal in your file’s folder**, then run the command in the table.
 
-On Windows, use `py simple.py`. The answer appears in the terminal. No Python packages are needed. Keep this personal file private because it contains your key; never commit or share it.
+The answer appears in that terminal. cURL prints the full JSON response; the answer is in `output_text`. No additional packages are needed once the chosen runtime is available. JavaScript runs in Node.js, not in a web page. Each real request consumes your Codex allowance.
 
-**Other languages:** [Python with an environment variable](examples/request.py) · [JavaScript](examples/request.mjs) · [PHP](examples/request.php) · [cURL](examples/request.sh). [How to configure these examples](docs/guide.md#send-your-first-request).
+Keep your personal file private because it contains your key. If it fails, open **Help → Solve a problem** in the app. These short examples show standard runtime errors or the API error; they do not retry automatically.
+
+For shared projects, use the environment-variable examples: [Python](examples/request.py), [JavaScript](examples/request.mjs), [PHP](examples/request.php), [cURL](examples/request.sh). [Configuration instructions](docs/guide.md#send-your-first-request).
 
 ## Connect your application
 
