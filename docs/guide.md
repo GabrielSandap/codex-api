@@ -89,7 +89,7 @@ node examples/request.mjs
 php examples/request.php     # PHP 8+ and cURL extension
 ```
 
-Or use [the cURL example](../examples/request.sh). The **How does it work?** section in the app also provides copyable examples and setup instructions.
+Or use [the cURL example](../examples/request.sh). The **Help** button in the app also provides copyable examples and setup instructions.
 
 Never commit a real key, include it in browser JavaScript, or ship it inside a distributed app. Each user runs their own local gateway and creates their own keys. A key authenticates requests; it is not technically bound to a particular application.
 
@@ -145,7 +145,7 @@ CLI failures are read from [Codex JSONL events](https://learn.chatgpt.com/docs/n
 
 ## Key status and analytics
 
-**Revoke** stops access while keeping the key and its analytics visible. **Delete**, available in the list and on the key detail page, permanently removes both after confirmation. Deleting an active key also interrupts its in-progress requests and prevents further use.
+**Revoke** stops access while keeping the key and its analytics visible. **Delete**, available on the key detail page, permanently removes both after confirmation. Deleting an active key also interrupts its in-progress requests and prevents further use.
 
 Click a key’s name to view its status, expiration, active requests, success rate, duration and reported tokens. The visible detail page refreshes every 5 seconds. The gateway retains the last 100 request events and 30 daily buckets, plus cumulative counters. Earlier requests without detailed metrics are labeled separately.
 

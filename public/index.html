@@ -7,44 +7,15 @@
 </head>
 <body>
   <div class="shell">
-    <header><a class="brand" href="/" aria-label="Codex API, home"><img class="brand-logo" src="/logo.svg" width="48" height="48" alt="">Codex API<span class="version">PREVIEW</span></a><div class="header-tools"><span class="local"><span class="dot"></span>On this computer</span><label class="language-control"><span class="sr-only">Interface language</span><select id="interface-language" aria-label="Interface language"><option value="en">English</option><option value="fr">Français</option></select></label></div></header>
+    <header><a class="brand" href="/" aria-label="Codex API, home"><img class="brand-logo" src="/logo.svg" width="48" height="48" alt="">Codex API</a><div class="header-tools"><span class="local" id="service-state" role="status"><span class="dot"></span><span id="service-label">Connecting…</span></span><label class="language-control"><span class="sr-only">Interface language</span><select id="interface-language" aria-label="Interface language"><option value="en">EN</option><option value="fr">FR</option></select></label><button id="open-help" class="secondary help-trigger">? <span>Help</span></button></div></header>
     <main>
     <div id="overview-page">
-      <section class="intro"><div><p class="eyebrow">YOUR CODEX. YOUR ACCESS.</p><h1>API keys, made simple.</h1><p class="lede">Use Codex CLI in your application through a local API.</p></div><button class="primary" id="create" disabled><span aria-hidden="true">＋</span> Create a key</button></section>
+      <section class="intro"><div><h1>My keys</h1><p class="lede">Click a key to manage it.</p></div><button class="primary" id="create" disabled><span aria-hidden="true">＋</span> Create a key</button></section>
       <p id="usage-notice" class="notice" role="status" hidden></p>
       <p id="notice" class="notice" role="status" hidden></p>
-      <section class="connection" aria-label="Connection"><div class="connection-state"><span class="status-icon" id="status-icon">◌</span><div><strong id="connection-title">Connecting to the service…</strong><p id="connection-detail">Checking Codex CLI</p></div></div><div class="endpoint"><span>API BASE URL</span><button id="copy-address" class="address" title="Copy address"><code id="base-url">—</code><span aria-hidden="true">⧉</span></button></div></section>
-      <section class="keys-section"><div class="section-heading"><h2>Your keys <span id="key-count">—</span></h2><button id="refresh" class="text-button">Refresh ↻</button></div><div id="keys"></div><div id="empty" class="empty" hidden><span class="empty-symbol" aria-hidden="true">⌘</span><h3>Your API access.</h3><p>Create a key to authenticate requests from your application.<br>You can revoke it at any time.</p><button id="create-empty" class="text-button">Create my first key <span aria-hidden="true">↗</span></button></div></section>
-      <details class="help" id="developer-guide">
-        <summary>How does it work? <span aria-hidden="true">＋</span></summary>
-        <section class="integration"><h3>Requirements</h3><p class="guide-intro">Keep this computer powered on, awake and connected to the Internet, with Codex API running in the terminal. You can close this page after setup.</p><p class="guide-intro">Requires Node.js 22+, a compatible stable Codex CLI 0.153.4+ signed in with ChatGPT and access to gpt-6-astra. Run npm run setup to check existing prerequisites without reinstalling them. A saved login does not guarantee available allowance.</p><p class="guide-intro">If the computer sleeps or the service stops, requests fail or time out. Wake it and restart the service before retrying.</p></section>
-        <div class="steps">
-          <div><span>01</span><strong>Create your key</strong><p>Copy the secret when you create it. It authenticates your API requests.</p></div>
-          <div><span>02</span><strong>Choose your language</strong><p>Copy an example below and run it on this computer.</p></div>
-          <div><span>03</span><strong>Receive the response</strong><p>Codex processes the message. Your program receives the response text.</p></div>
-        </div>
-        <section class="integration" aria-labelledby="integration-title">
-          <h3 id="integration-title">Connect your program to the API</h3>
-          <p class="guide-intro">Keep Codex API running. These examples call your local API and use your Codex account allowance.</p>
-          <details class="env-help">
-            <summary>1. Provide the key to your program</summary>
-            <p>In the terminal where you will run your program, run these commands and paste your key when prompted. Input is hidden and the key is not written to command history.</p>
-            <div class="code-toolbar"><label for="setup-platform">Terminal</label><select id="setup-platform"><option value="posix">macOS / Linux — Bash or Zsh</option><option value="powershell">Windows — PowerShell</option></select><button class="text-button" id="copy-setup" type="button">Copy</button></div>
-            <pre class="example-code" tabindex="0" aria-label="Commands to set your key"><code id="setup-code"></code></pre>
-            <p>The variable <code>CODEX_LOCAL_KEY</code> is available to programs launched from this terminal. For an IDE, configure its environment variables. Never publish your key in Git, a web page or a distributed application.</p>
-          </details>
-          <div class="example-heading"><label for="example-language">2. Send your first message</label><select id="example-language"><option value="python">Python</option><option value="javascript">JavaScript / Node.js</option><option value="curl">cURL</option><option value="php">PHP</option></select></div>
-          <p id="example-requirements" class="guide-intro"></p>
-          <div class="code-toolbar"><span id="example-file"></span><button id="copy-example" class="text-button" type="button">Copy code</button></div>
-          <pre class="example-code" tabindex="0" aria-label="API request example"><code id="example-code"></code></pre>
-          <p class="run-command">Run: <code id="example-run"></code></p>
-          <p class="guide-intro" id="example-result"></p>
-          <p id="guide-copy-status" class="guide-copy-status" role="status" aria-live="polite"></p>
-          <details class="env-help"><summary>Configure an existing application</summary><p>If your application supports an “OpenAI compatible” provider, enter these values:</p><dl class="integration-settings"><dt>Base URL</dt><dd><code id="guide-base-url"></code></dd><dt>API key</dt><dd>The key you created here</dd><dt>Model</dt><dd><code>codex</code></dd><dt>Streaming</dt><dd>Disabled</dd></dl><p>The application must accept a custom base URL and run on this computer. A Codex API key does not work directly on OpenAI servers.</p></details>
-          <details class="env-help"><summary>If a request fails</summary><dl class="integration-settings"><dt>Connection refused</dt><dd>Check that Codex API is running and that the address and port are correct.</dd><dt>401 error</dt><dd>The key is missing, incorrect, expired or revoked.</dd><dt>400 error</dt><dd>Check the request fields. This preview supports text only, without streaming or tools.</dd><dt>429 error</dt><dd>The service is limiting the request rate or concurrency. Wait before retrying.</dd><dt>502 error</dt><dd>Read the returned message and check your Codex account connection and limits.</dd></dl></details>
-          <p class="help-note">JavaScript: run the example in Node.js. Requests from web pages on another origin are rejected; never put this key in code sent to visitors. Inside Docker, a VM or another computer, “localhost” does not refer to this service.</p>
-        </section>
-      </details>
+
+      <section class="keys-section"><div id="keys"></div><div id="empty" class="empty" hidden><span class="empty-symbol" aria-hidden="true">⌘</span><h3>Your API access.</h3><p>Create a key to authenticate requests from your application.<br>You can revoke it at any time.</p><button id="create-empty" class="text-button">Create my first key <span aria-hidden="true">↗</span></button></div></section>
+
     </div>
     <section id="key-page" hidden aria-labelledby="key-title">
       <a href="#" class="back-link">← All keys</a>
@@ -62,6 +33,49 @@
     <footer><span><span class="dot"></span> Local service · No intermediary hosting</span><span>Text chat only in this version</span></footer>
   </div>
 
+
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <button class="close help-close" data-close aria-label="Close">×</button>
+    <div id="help-home">
+      <h2 id="help-title" tabindex="-1">How does it work?</h2>
+      <p class="muted help-subtitle">Your first request, in three steps.</p>
+      <ol class="help-steps">
+        <li><div><h3>Create a key</h3><p>Copy it when you create it.</p></div></li>
+        <li><div><h3>Choose an example</h3><p>Python, JavaScript or another language.</p></div></li>
+        <li><div><h3>Run your program</h3><p>Keep Codex API running on this computer.</p></div></li>
+      </ol>
+      <div class="help-links"><button data-help="requirements">Check requirements →</button><button data-help="troubleshooting">Solve a problem →</button></div>
+      <div class="dialog-actions"><button class="primary" data-help="examples">View examples</button></div>
+    </div>
+    <div id="help-content" hidden>
+      <button class="text-button help-back" data-help="home">← Back to help</button>
+      <section id="help-requirements" hidden><section class="integration"><h3>Requirements</h3><p class="guide-intro">Keep this computer powered on, awake and connected to the Internet, with Codex API running in the terminal. You can close this page after setup.</p><p class="guide-intro">Requires Node.js 22+, a compatible stable Codex CLI 0.153.4+ signed in with ChatGPT and access to gpt-6-astra. Run npm run setup to check existing prerequisites without reinstalling them. A saved login does not guarantee available allowance.</p><p class="guide-intro">If the computer sleeps or the service stops, requests fail or time out. Wake it and restart the service before retrying.</p></section>
+      <section class="connection" aria-label="Connection"><div class="connection-state"><span class="status-icon" id="status-icon">◌</span><div><strong id="connection-title">Connecting to the service…</strong><p id="connection-detail">Checking Codex CLI</p></div></div><div class="endpoint"><span>API BASE URL</span><button id="copy-address" class="address" title="Copy address"><code id="base-url">—</code><span aria-hidden="true">⧉</span></button></div></section></section>
+      <section id="help-examples" hidden>        <section class="integration" aria-labelledby="integration-title">
+          <h3 id="integration-title">Connect your program to the API</h3>
+          <p class="guide-intro">Keep Codex API running. These examples call your local API and use your Codex account allowance.</p>
+          <details class="env-help">
+            <summary>1. Provide the key to your program</summary>
+            <p>In the terminal where you will run your program, run these commands and paste your key when prompted. Input is hidden and the key is not written to command history.</p>
+            <div class="code-toolbar"><label for="setup-platform">Terminal</label><select id="setup-platform"><option value="posix">macOS / Linux — Bash or Zsh</option><option value="powershell">Windows — PowerShell</option></select><button class="text-button" id="copy-setup" type="button">Copy</button></div>
+            <pre class="example-code" tabindex="0" aria-label="Commands to set your key"><code id="setup-code"></code></pre>
+            <p>The variable <code>CODEX_LOCAL_KEY</code> is available to programs launched from this terminal. For an IDE, configure its environment variables. Never publish your key in Git, a web page or a distributed application.</p>
+          </details>
+          <div class="example-heading"><label for="example-language">2. Send your first message</label><select id="example-language"><option value="python">Python</option><option value="javascript">JavaScript / Node.js</option><option value="curl">cURL</option><option value="php">PHP</option></select></div>
+          <p id="example-requirements" class="guide-intro"></p>
+          <div class="code-toolbar"><span id="example-file"></span><button id="copy-example" class="text-button" type="button">Copy code</button></div>
+          <pre class="example-code" tabindex="0" aria-label="API request example"><code id="example-code"></code></pre>
+          <p class="run-command">Run: <code id="example-run"></code></p>
+          <p class="guide-intro" id="example-result"></p>
+          <p id="guide-copy-status" class="guide-copy-status" role="status" aria-live="polite"></p>
+          <details class="env-help"><summary>Configure an existing application</summary><p>If your application supports an “OpenAI compatible” provider, enter these values:</p><dl class="integration-settings"><dt>Base URL</dt><dd><code id="guide-base-url"></code></dd><dt>API key</dt><dd>The key you created here</dd><dt>Model</dt><dd><code>codex</code></dd><dt>Streaming</dt><dd>Disabled</dd></dl><p>The application must accept a custom base URL and run on this computer. A Codex API key does not work directly on OpenAI servers.</p></details>
+
+          <p class="help-note">JavaScript: run the example in Node.js. Requests from web pages on another origin are rejected; never put this key in code sent to visitors. Inside Docker, a VM or another computer, “localhost” does not refer to this service.</p>
+        </section>
+</section>
+      <section id="help-troubleshooting" hidden><h2>Troubleshooting</h2><p class="guide-intro">Management locked? Open the private link printed when the service starts. If it has expired, restart the service to get a new link. Your keys are preserved.</p>          <details class="env-help" open><summary>If a request fails</summary><dl class="integration-settings"><dt>Connection refused</dt><dd>Check that Codex API is running and that the address and port are correct.</dd><dt>401 error</dt><dd>The key is missing, incorrect, expired or revoked.</dd><dt>400 error</dt><dd>Check the request fields. This preview supports text only, without streaming or tools.</dd><dt>429 error</dt><dd>Check the error message: your Codex allowance may be exhausted, or requests may be arriving too quickly. Your key remains valid. Wait before retrying.</dd><dt>502 error</dt><dd>Read the returned message and check your Codex account connection and limits.</dd></dl></details></section>
+    </div>
+  </dialog>
   <dialog id="create-dialog"><form id="create-form"><div class="dialog-heading"><p class="eyebrow">NEW ACCESS</p><button type="button" class="close" data-close aria-label="Close">×</button></div><h2>Create a key</h2><p class="muted">Authenticate your application’s requests to the local API.</p><label for="key-name">Key name</label><input id="key-name" name="name" placeholder="e.g. Local development" maxlength="60" required autocomplete="off"><label for="expiry">Expiration</label><select id="expiry"><option value="1">In 24 hours</option><option value="7">In 7 days</option><option value="30" selected>In 30 days</option><option value="90">In 90 days</option><option value="never">Never expires</option></select><div class="permission"><span class="permission-icon">✓</span><div><strong>Text chat only</strong><p>Commands, files, browser and extensions are disabled for requests.</p></div></div><p id="create-error" class="form-error" role="alert"></p><button class="primary wide" type="submit">Create key</button></form></dialog>
 
   <dialog id="secret-dialog"><div class="dialog-heading"><p class="eyebrow">ACCESS CREATED</p><button class="close" data-close aria-label="Close">×</button></div><h2>Your key is ready.</h2><p class="muted">Copy it now. It will not be shown again.</p><label for="new-secret">API key</label><div class="copy-field"><input id="new-secret" readonly spellcheck="false"><button id="copy-secret" class="secondary">Copy</button></div><label>Base URL</label><code id="new-base" class="code-block"></code><div class="model-row"><span>Model</span><code>codex</code></div><p id="secret-copy-status" role="status" class="muted"></p><div class="dialog-actions"><button id="test-new" class="secondary">Test this key</button><button data-close class="primary">Done</button></div></dialog>

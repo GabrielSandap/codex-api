@@ -30,29 +30,22 @@ function render() {
   $('#create').disabled = false;
   $('#keys').replaceChildren();
   $('#empty').hidden = state.keys.length > 0;
-  $('#key-count').textContent = state.keys.filter(key => key.status === 'active').length;
+  $('#service-label').textContent = ready ? t('Ready') : t('Setup needed');
+  $('#service-state').classList.toggle('not-ready', !ready);
   if (!ready) notice(`${t(state.codex.message)} ${!state.codex.connected ? t("Commande à utiliser : codex login") : ''}`);
   for (const key of state.keys) {
-    const row = document.createElement('div'); row.className = 'key-row';
-    const info = document.createElement('a'); info.className = 'key-info key-link'; info.href = `#key=${key.id}`; info.setAttribute('aria-label', t('Statut et analyse de {name}', { name: key.name }));
+    const row = document.createElement('a'); row.className = 'key-row'; row.href = `#key=${key.id}`;
+    row.setAttribute('aria-label', t('Statut et analyse de {name}', { name: key.name }));
+    const icon = document.createElement('span'); icon.className = 'key-symbol'; icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 3a7 7 0 0 0-6.4 9.8L2 18.4V22h3.6v-3h3v-3l2.6-2.6A7 7 0 1 0 14 3Z"/><circle cx="16" cy="7" r="1"/></svg>';
+    const info = document.createElement('div'); info.className = 'key-info';
     const name = document.createElement('span'); name.className = 'key-name'; name.textContent = key.name;
-    const badge = document.createElement('span'); badge.className = `badge ${key.status === 'active' ? '' : 'inactive'}`;
-    badge.textContent = { active: t("Discussion"), expired: t("Expirée"), revoked: t("Révoquée") }[key.status];
-    const meta = document.createElement('div'); meta.className = 'key-meta';
-    const prefix = document.createElement('code'); prefix.textContent = `${key.prefix}••••`;
-    meta.append(prefix, document.createTextNode(` · ${key.expiresAt ? t('Expire le {date}', { date: date(key.expiresAt) }) : t('Sans expiration')} · ${t('{count} appel(s) réussi(s)', { count: key.requests })}`));
-    info.append(name, badge, meta); row.append(info);
-    const actions = document.createElement('div'); actions.className = 'key-actions';
-    if (key.status === 'active') {
-      const test = document.createElement('button'); test.textContent = t("Tester"); test.setAttribute('aria-label', t('Tester {name}', { name: key.name })); test.onclick = () => openTest('');
-      const revoke = document.createElement('button'); revoke.textContent = t("Révoquer"); revoke.setAttribute('aria-label', t('Révoquer {name}', { name: key.name }));
-      revoke.onclick = () => openRevoke(key);
-      actions.append(test, revoke);
-    }
-    const remove = document.createElement('button'); remove.textContent = t('Supprimer');
-    remove.setAttribute('aria-label', t('Supprimer {name}', { name: key.name }));
-    remove.onclick = () => openDelete(key); actions.append(remove); row.append(actions);
-    $('#keys').append(row);
+    const meta = document.createElement('div'); meta.className = 'key-meta'; meta.textContent = t('Created {date}', { date: date(key.createdAt) });
+    info.append(name, meta);
+    const badge = document.createElement('span'); badge.className = `list-status ${key.status === 'active' ? '' : 'inactive'}`;
+    badge.textContent = { active: t('Active'), expired: t('Expirée'), revoked: t('Révoquée') }[key.status];
+    const arrow = document.createElement('span'); arrow.className = 'key-chevron'; arrow.textContent = '›'; arrow.setAttribute('aria-hidden', 'true');
+    row.append(icon, info, badge, arrow); $('#keys').append(row);
   }
 }
 async function refresh() {
@@ -64,7 +57,8 @@ async function refresh() {
     $('#create').disabled = true;
     $('#keys').replaceChildren();
     $('#empty').hidden = true;
-    $('#key-count').textContent = '—';
+    $('#service-label').textContent = locked ? t('Locked') : t('Unavailable');
+    $('#service-state').classList.add('not-ready');
     $('#base-url').textContent = '—';
     $('#status-icon').textContent = '!';
     $('#connection-title').textContent = locked ? t("Gestion verrouillée dans ce navigateur") : t("Service indisponible");
@@ -77,7 +71,7 @@ function openRevoke(key) { revokeId = key.id; $('#revoke-detail').textContent = 
 for (const button of document.querySelectorAll('[data-close]')) button.onclick = () => button.closest('dialog').close();
 function openCreate() { $('#create-form').reset(); $('#create-error').textContent = ''; $('#create-dialog').showModal(); }
 $('#create').onclick = openCreate; $('#create-empty').onclick = openCreate;
-$('#refresh').onclick = refresh;
+
 $('#copy-address').onclick = () => { if (state) copy(state.baseUrl, $('#copy-address span')); };
 $('#create-form').onsubmit = async event => {
   event.preventDefault(); const button = event.submitter; button.disabled = true;
@@ -161,3 +155,16 @@ renderExample(); renderSetup();
 window.addEventListener('languagechange', () => { refresh(); renderExample(); renderSetup(); });
 
 setInterval(() => { if (!document.hidden && !$('#overview-page').hidden && !document.querySelector('dialog[open]')) refresh(); }, 5000);
+
+function showHelp(view = 'home') {
+  $('#help-home').hidden = view !== 'home';
+  $('#help-content').hidden = view === 'home';
+  for (const name of ['requirements', 'examples', 'troubleshooting']) $(`#help-${name}`).hidden = name !== view;
+  $('#help-dialog').classList.toggle('help-expanded', view !== 'home');
+  $('#help-dialog').scrollTop = 0;
+}
+$('#open-help').onclick = () => { showHelp(); $('#help-dialog').showModal(); $('#help-title').focus(); };
+for (const button of document.querySelectorAll('[data-help]')) button.onclick = () => {
+  showHelp(button.dataset.help);
+  const target = button.dataset.help === 'home' ? $('#help-title') : $('.help-back'); target.focus();
+};

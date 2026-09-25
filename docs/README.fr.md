@@ -60,7 +60,7 @@ python3 simple.py
 
 Sur Windows : `py simple.py`. La réponse apparaît dans le terminal. Aucun paquet Python à installer. Ce fichier contient votre clé : gardez-le privé, ne le publiez pas et ne le partagez pas.
 
-**Autres exemples :** [Python avec une variable d’environnement](../examples/request.py) · [JavaScript](../examples/request.mjs) · [PHP](../examples/request.php) · [cURL](../examples/request.sh). Leur configuration est aussi expliquée dans « Comment ça marche ? » dans l’application.
+**Autres exemples :** [Python avec une variable d’environnement](../examples/request.py) · [JavaScript](../examples/request.mjs) · [PHP](../examples/request.php) · [cURL](../examples/request.sh). Leur configuration est aussi expliquée via le bouton « Aide » dans l’application.
 
 ## Connecter votre application
 
