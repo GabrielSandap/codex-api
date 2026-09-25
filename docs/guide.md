@@ -145,6 +145,8 @@ CLI failures are read from [Codex JSONL events](https://learn.chatgpt.com/docs/n
 
 ## Key status and analytics
 
+**Revoke** stops access while keeping the key and its analytics visible. **Delete**, available in the list and on the key detail page, permanently removes both after confirmation. Deleting an active key also interrupts its in-progress requests and prevents further use.
+
 Click a key’s name to view its status, expiration, active requests, success rate, duration and reported tokens. The visible detail page refreshes every 5 seconds. The gateway retains the last 100 request events and 30 daily buckets, plus cumulative counters. Earlier requests without detailed metrics are labeled separately.
 
 No prompts, responses, secrets or raw error messages are stored in these analytics. Tokens are recorded only when Codex reports them. They are not an account-wide quota meter or billing estimate; failed or cancelled requests can still consume allowance.

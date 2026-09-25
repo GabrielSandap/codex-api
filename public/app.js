@@ -4,7 +4,7 @@ import { getExamples, setupCommands } from './examples.js';
 import { setupKeyPage } from './key-page.js';
 
 const $ = selector => document.querySelector(selector);
-let state, newToken = '', revokeId, testController;
+let state, newToken = '', revokeId, deleteId, testController;
 const date = value => value ? new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short' }).format(new Date(value)) : t("Jamais");
 async function request(path, options = {}) {
   const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', 'X-Codex-API': '1', ...options.headers } });
@@ -42,13 +42,16 @@ function render() {
     const prefix = document.createElement('code'); prefix.textContent = `${key.prefix}••••`;
     meta.append(prefix, document.createTextNode(` · ${key.expiresAt ? t('Expire le {date}', { date: date(key.expiresAt) }) : t('Sans expiration')} · ${t('{count} appel(s) réussi(s)', { count: key.requests })}`));
     info.append(name, badge, meta); row.append(info);
+    const actions = document.createElement('div'); actions.className = 'key-actions';
     if (key.status === 'active') {
-      const actions = document.createElement('div'); actions.className = 'key-actions';
       const test = document.createElement('button'); test.textContent = t("Tester"); test.setAttribute('aria-label', t('Tester {name}', { name: key.name })); test.onclick = () => openTest('');
       const revoke = document.createElement('button'); revoke.textContent = t("Révoquer"); revoke.setAttribute('aria-label', t('Révoquer {name}', { name: key.name }));
       revoke.onclick = () => openRevoke(key);
-      actions.append(test, revoke); row.append(actions);
+      actions.append(test, revoke);
     }
+    const remove = document.createElement('button'); remove.textContent = t('Supprimer');
+    remove.setAttribute('aria-label', t('Supprimer {name}', { name: key.name }));
+    remove.onclick = () => openDelete(key); actions.append(remove); row.append(actions);
     $('#keys').append(row);
   }
 }
@@ -69,6 +72,7 @@ async function refresh() {
     notice(locked ? t("Ouvrez dans ce navigateur le lien privé de gestion affiché au lancement dans le terminal. Si ce lien a déjà été utilisé ou a expiré, arrêtez le service avec Ctrl+C, puis relancez npm start depuis le dossier du projet pour en obtenir un nouveau.") : error.message);
   }
 }
+function openDelete(key) { deleteId = key.id; $('#delete-detail').textContent = key.name; $('#delete-error').textContent = ''; $('#delete-dialog').showModal(); }
 function openRevoke(key) { revokeId = key.id; $('#revoke-detail').textContent = key.name; $('#revoke-error').textContent = ''; $('#revoke-dialog').showModal(); }
 for (const button of document.querySelectorAll('[data-close]')) button.onclick = () => button.closest('dialog').close();
 function openCreate() { $('#create-form').reset(); $('#create-error').textContent = ''; $('#create-dialog').showModal(); }
@@ -108,6 +112,17 @@ $('#confirm-revoke').onclick = async () => {
   catch (error) { $('#revoke-error').textContent = error.message; }
   finally { button.disabled = false; }
 };
+$('#confirm-delete').onclick = async () => {
+  const button = $('#confirm-delete'); button.disabled = true;
+  const id = deleteId;
+  try {
+    await request(`/admin/keys/${id}/permanent`, { method: 'DELETE' });
+    $('#delete-dialog').close();
+    if (location.hash === `#key=${id}`) { history.replaceState(null, '', location.pathname); detailPage.route(); }
+    await refresh();
+  } catch (error) { $('#delete-error').textContent = error.message; }
+  finally { button.disabled = false; }
+};
 async function init() {
   const token = new URLSearchParams(location.hash.slice(1)).get('setup');
   if (token) history.replaceState(null, '', location.pathname);
@@ -117,7 +132,7 @@ async function init() {
   }
   await refresh();
 }
-const detailPage = setupKeyPage({ request, onTest: () => openTest(''), onRevoke: openRevoke });
+const detailPage = setupKeyPage({ request, onTest: () => openTest(''), onRevoke: openRevoke, onDelete: openDelete });
 init();
 window.addEventListener('hashchange', () => { if (location.hash.startsWith('#setup=')) init(); else if (!location.hash) refresh(); });
 

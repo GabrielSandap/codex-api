@@ -36,6 +36,7 @@ export class KeyStore {
     return { key: this.public(key), analytics: key.analytics ?? null };
   }
   record(key, { route, status, durationMs, usage, errorCode, cancelled = false }) {
+    if (!this.keys.includes(key)) return; // Deleted keys must never regain analytics.
     const now = new Date().toISOString();
     const a = key.analytics ??= { since: now, historicalSuccesses: key.requests, total: 0, succeeded: 0, failed: 0, cancelled: 0, durationMs: 0, inputTokens: 0, outputTokens: 0, measuredUsage: 0, days: {}, recent: [] };
     cancelled ||= status === 499;
@@ -70,6 +71,13 @@ export class KeyStore {
     if (typeof token !== 'string' || !/^cxl_[A-Za-z0-9_-]{43}$/.test(token)) return null;
     const hash = digest(token);
     return this.keys.find(k => equal(k.hash, hash) && this.public(k).status === 'active') ?? null;
+  }
+  remove(id) {
+    const previous = this.keys;
+    if (!previous.some(key => key.id === id)) return false;
+    this.keys = previous.filter(key => key.id !== id);
+    try { this.save(); } catch (error) { this.keys = previous; throw error; }
+    return true;
   }
   revoke(id) {
     const key = this.keys.find(k => k.id === id);

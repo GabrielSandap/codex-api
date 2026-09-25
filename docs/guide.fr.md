@@ -107,6 +107,8 @@ La compatibilité est un **sous-ensemble texte**, pas une implémentation compl�
 
 ### Suivi d’une clé
 
+**Révoquer** coupe l’accès en conservant la clé et ses statistiques. **Supprimer**, disponible dans la liste et sur la page de la clé, efface définitivement les deux après confirmation. Supprimer une clé active interrompt aussi ses demandes en cours et empêche toute nouvelle utilisation.
+
 Cliquez sur le nom d’une clé pour ouvrir sa page **Statut et analyse** : état, expiration, permission, appels en cours, taux de réussite, durée moyenne, tokens rapportés et activité sur sept jours. La page s’actualise toutes les cinq secondes lorsqu’elle est visible.
 
 Les statistiques concernent les routes de génération appelées avec une clé valide sur cette passerelle. Les 100 derniers appels et 30 jours d’agrégats quotidiens sont conservés localement ; les compteurs cumulés sont conservés depuis le début du suivi. Les anciens succès restent indiqués séparément sans inventer les mesures manquantes. Les prompts, réponses, secrets et messages bruts d’erreur ne sont pas stockés. Les tokens mesurés ne représentent ni le quota global ni une facture et peuvent être absents pour certains appels.

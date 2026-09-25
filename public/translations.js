@@ -1,5 +1,11 @@
 // Static UI copy and known gateway messages. Never used on user content.
 export const translations = {
+  "Supprimer": "Delete",
+  "Supprimer {name}": "Delete {name}",
+  "SUPPRIMER L’ACCÈS": "DELETE ACCESS",
+  "Supprimer cette clé ?": "Delete this key?",
+  "Supprimer la clé": "Delete key",
+  "La clé et ses statistiques seront définitivement supprimées. Son accès sera immédiatement coupé et les demandes en cours interrompues. Cette action est irréversible.": "This permanently removes the key and its analytics. Its access stops immediately and requests in progress are interrupted. This cannot be undone.",
   "Codex API, accueil": "Codex API, home",
   "Sur cet ordinateur": "On this computer",
   "VOTRE CODEX. VOS ACCÈS.": "YOUR CODEX. YOUR ACCESS.",

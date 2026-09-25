@@ -117,6 +117,12 @@ export async function createGateway({ dataDir, port = 4317, runner = runCodex, s
           if (!detail) fail(404, "Key not found.");
           json(200, { ...detail, codex: await getStatus(), activeRequests: [...active.values()].filter(item => item.keyId === id).length }); return;
         }
+        if (/^\/admin\/keys\/[a-f0-9-]+\/permanent$/.test(path) && req.method === 'DELETE') {
+          const id = path.split('/').at(-2);
+          if (!store.remove(id)) fail(404, "Key not found.");
+          for (const item of active.values()) if (item.keyId === id) item.controller.abort();
+          json(200, { ok: true }); return;
+        }
         if (/^\/admin\/keys\/[a-f0-9-]+$/.test(path) && req.method === 'DELETE') {
           const id = path.split('/').at(-1);
           if (!store.revoke(id)) fail(404, "Key not found.");

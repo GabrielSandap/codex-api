@@ -226,3 +226,39 @@ test('upstream rate limits and gateway throttling expose different codes', async
   assert.equal(local.status, 429);
   assert.equal(local.data.error.code, 'gateway_rate_limited');
 });
+
+test('suppression définitive protégée, persistante et distincte de la révocation', async t => {
+  const app = await setup(t);
+  for (const state of ['active', 'revoked', 'expired']) {
+    const { key, token } = await app.create(state);
+    await app.call('/v1/responses', { method: 'POST', token, data: { input: 'Hello' } });
+    if (state === 'revoked') await app.call(`/admin/keys/${key.id}`, { method: 'DELETE', cookie: app.cookie });
+    if (state === 'expired') app.store.keys.find(k => k.id === key.id).expiresAt = new Date(0).toISOString();
+    const path = `/admin/keys/${key.id}/permanent`;
+    assert.equal((await app.call(path, { method: 'DELETE', token })).status, 401);
+    assert.equal((await app.call(path, { method: 'DELETE', cookie: app.cookie, headers: { Origin: 'https://other.invalid' } })).status, 403);
+    assert.equal((await app.call(path, { method: 'DELETE', cookie: app.cookie, headers: { 'X-Codex-API': '' } })).status, 403);
+    assert.equal((await app.call(path, { method: 'DELETE', cookie: app.cookie })).status, 200);
+    assert.equal((await app.call('/v1/models', { token })).status, 401);
+    assert.equal((await app.call(`/admin/keys/${key.id}`, { cookie: app.cookie })).status, 404);
+    assert.equal((await app.call(path, { method: 'DELETE', cookie: app.cookie })).status, 404);
+    assert.equal((await app.call('/admin/state', { cookie: app.cookie })).data.keys.some(k => k.id === key.id), false);
+    assert.equal((await readFile(join(app.dataDir, 'keys.json'), 'utf8')).includes(key.id), false);
+  }
+});
+
+test('supprimer annule un appel en cours sans recréer son historique', async t => {
+  let entered; const started = new Promise(resolve => { entered = resolve; });
+  let aborted = false;
+  const app = await setup(t, async (_, { signal }) => {
+    entered();
+    return new Promise((resolve, reject) => signal.addEventListener('abort', () => { aborted = true; reject(new Error('Cancelled')); }, { once: true }));
+  });
+  const { key, token } = await app.create();
+  const pending = app.call('/v1/responses', { method: 'POST', token, data: { input: 'Hello' } });
+  await started;
+  assert.equal((await app.call(`/admin/keys/${key.id}/permanent`, { method: 'DELETE', cookie: app.cookie })).status, 200);
+  await pending;
+  assert.equal(aborted, true);
+  assert.deepEqual(JSON.parse(await readFile(join(app.dataDir, 'keys.json'), 'utf8')).keys, []);
+});

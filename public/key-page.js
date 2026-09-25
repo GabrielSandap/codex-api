@@ -1,6 +1,6 @@
 import { renderUsage } from './usage.js';
 import { t, locale } from './i18n.js';
-export function setupKeyPage({ request, onTest, onRevoke }) {
+export function setupKeyPage({ request, onTest, onRevoke, onDelete }) {
   const $ = selector => document.querySelector(selector);
   let currentKey, selectedId, generation = 0, pending = false;
   const number = n => new Intl.NumberFormat(locale()).format(n);
@@ -16,6 +16,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
     $('#detail-prefix').textContent = `${key.prefix}••••`;
     $('#detail-status').textContent = { active: 'Active', revoked: t("Révoquée"), expired: t("Expirée") }[key.status];
     $('#detail-status').className = `badge ${key.status === 'active' ? '' : 'inactive'}`;
+    $('#detail-delete').disabled = false;
     $('#detail-test').disabled = key.status !== 'active';
     $('#detail-revoke').disabled = key.status === 'revoked';
     $('#detail-connection').textContent = data.codex.connected && data.codex.supported ? t("Compte Codex connecté · Version validée") : t(data.codex.message);
@@ -68,7 +69,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
       renderUsage(null, $('#detail-usage'));
       $('#key-title').textContent = t("Chargement…");
       $('#detail-prefix').textContent = ''; $('#detail-status').textContent = '';
-      $('#detail-test').disabled = true; $('#detail-revoke').disabled = true;
+      $('#detail-test').disabled = true; $('#detail-revoke').disabled = true; $('#detail-delete').disabled = true;
       for (const selector of ['#stat-total', '#stat-success', '#stat-failed', '#stat-duration', '#stat-tokens']) $(selector).textContent = '—';
       for (const selector of ['#detail-connection', '#detail-last-call', '#detail-running', '#tracking-note', '#detail-updated', '#key-facts', '#request-rows', '#activity-chart']) $(selector).replaceChildren();
       $('#no-requests').hidden = true;
@@ -83,7 +84,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
       $('#detail-last-call').textContent = t("Les données affichées peuvent être anciennes.");
       $('#detail-running').textContent = '';
       if (!currentKey) $('#key-title').textContent = t("Clé indisponible");
-      $('#detail-test').disabled = true; $('#detail-revoke').disabled = true;
+      $('#detail-test').disabled = true; $('#detail-revoke').disabled = true; $('#detail-delete').disabled = true;
     } finally { if (ticket === generation) pending = false; }
   }
   function route() {
@@ -91,6 +92,7 @@ export function setupKeyPage({ request, onTest, onRevoke }) {
     $('#overview-page').hidden = detail; $('#key-page').hidden = !detail;
     if (detail) refresh(); else { generation++; pending = false; selectedId = null; }
   }
+  $('#detail-delete').onclick = () => { if (currentKey) onDelete(currentKey); };
   $('#detail-refresh').onclick = refresh;
   $('#detail-test').onclick = () => { if (currentKey) onTest(); };
   $('#detail-revoke').onclick = () => { if (currentKey) onRevoke(currentKey); };
